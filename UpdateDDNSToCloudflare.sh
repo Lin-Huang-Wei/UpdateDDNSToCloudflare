@@ -9,7 +9,7 @@
 ####################################################################################################
 
 NEW_PUBLIC_IP="`curl -s https://ifconfig.io || curl -s https://ipv4.icanhazip.com/`"
-CURRENT_PUBLIC_IP="`cat /Scripts/current_ip.txt`"
+CURRENT_PUBLIC_IP="`cat /tmp/current_ip.txt`"
 DOMAIN_NAME='Your Doamin Name'
 AUTH_EMAIL='Your E-mail Address'
 AUTH_KEY='You can find on cloudflare website'
