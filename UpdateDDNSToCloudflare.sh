@@ -35,10 +35,10 @@ fi
 #                                                                                                  #
 ####################################################################################################
 
-RECORD_ID="`curl -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=A&name=${DOMAIN_NAME}&content=${CURRENT_PUBLIC_IP}&proxied=${PROXY}&page=1&per_page=20&order=type&direction=desc&match=all" \
-	-H "X-Auth-Email:${AUTH_EMAIL}" \
-	-H "X-Auth-Key:${AUTH_KEY}" \
-	-H "Content-Type: application/json" | jq '.result[].id' | sed 's/\"//g'`"
+RECORED_ID="$(curl -X GET --url https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records \
+	-H "Content-Type: application/json" \
+	-H "X-Auth-Email: ${AUTH_EMAIL}" \
+	-H "X-Auth-Key: ${AUTH_KEY}" | jq -r '.result[0].id')"
 
 ####################################################################################################
 #                                                                                                  #
@@ -46,15 +46,22 @@ RECORD_ID="`curl -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/d
 #                                                                                                  #
 ####################################################################################################
 
-if [ "${NEW_PUBLIC_IP}" = "${CURRENT_PUBLIC_IP}" ]; then
+if [ "${NEW_PUBLIC_IP}" != "${CURRENT_PUBLIC_IP}" ]; then
 	logger --no-act -s "DDNS Updater: IP ${CURRENT_PUBLIC_IP} for ${DOMAIN_NAME} has not changed." 2>&1 | sed 's/^<[0-9]\+>//' >> ${LOG_FILE}
 	exit 1
 else
-	curl -X PUT "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
+	curl -X PUT --url https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORED_ID} \
+		-H "Content-Type: application/json" \
 		-H "X-Auth-Email:${AUTH_EMAIL}" \
 		-H "X-Auth-Key:${AUTH_KEY}" \
-		-H "Content-Type: application/json" \
-		--data "{\"type\":\"A\",\"name\":\"${DOMAIN_NAME}\",\"content\":\"${NEW_PUBLIC_IP}\",\"ttl\":\"${TTL}\",\"proxied\":${PROXY}}"
+		--data "{
+		\"type\":\"A\",
+		\"name\":\"${DOMAIN_NAME}\",
+		\"content\": \"${NEW_PUBLIC_IP}\",
+		\"proxied\":${PROXY},
+		\"ttl\":\"${TTL}\",
+		\"comment\": \"Update Domain record at $(date +%F-%H:%M:%S)\"
+	}"
 	echo ${NEW_PUBLIC_IP} > ${CURRENT_IP_FILE}
 	logger --no-act -s "DDNS Updater: IP ${NEW_PUBLIC_IP} for ${DOMAIN_NAME} is update" 2>&1 | sed 's/^<[0-9]\+>//' >> ${LOG_FILE}
 fi
