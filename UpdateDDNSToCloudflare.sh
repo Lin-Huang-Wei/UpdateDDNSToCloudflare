@@ -46,7 +46,7 @@ RECORED_ID="$(curl -X GET --url https://api.cloudflare.com/client/v4/zones/${ZON
 #                                                                                                  #
 ####################################################################################################
 
-if [ "${NEW_PUBLIC_IP}" != "${CURRENT_PUBLIC_IP}" ]; then
+if [ "${NEW_PUBLIC_IP}" = "${CURRENT_PUBLIC_IP}" ]; then
 	logger --no-act -s "DDNS Updater: IP ${CURRENT_PUBLIC_IP} for ${DOMAIN_NAME} has not changed." 2>&1 | sed 's/^<[0-9]\+>//' >> ${LOG_FILE}
 	exit 1
 else
