@@ -14,7 +14,7 @@ DOMAIN_NAME='Your Doamin Name'
 AUTH_EMAIL='Your E-mail Address'
 AUTH_KEY='You can find on cloudflare website'
 ZONE_ID='You can find on cloudflare website'
-TTL='300'
+TTL=300
 PROXY='true'
 LOG_FILE='/var/log/UpdateDDNSToCloudflare.log'
 CURRENT_IP_FILE='/tmp/current_ip.txt'
@@ -36,9 +36,9 @@ fi
 ####################################################################################################
 
 RECORED_ID="$(curl -X GET --url https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records \
-	-H "Content-Type: application/json" \
-	-H "X-Auth-Email: ${AUTH_EMAIL}" \
-	-H "X-Auth-Key: ${AUTH_KEY}" | jq -r '.result[0].id')"
+	--header "Content-Type: application/json" \
+	--header "X-Auth-Email: ${AUTH_EMAIL}" \
+	--header "X-Auth-Key: ${AUTH_KEY}" | jq -r '.result[0].id')"
 
 ####################################################################################################
 #                                                                                                  #
@@ -59,7 +59,7 @@ else
 		\"name\":\"${DOMAIN_NAME}\",
 		\"content\": \"${NEW_PUBLIC_IP}\",
 		\"proxied\":${PROXY},
-		\"ttl\":\"${TTL}\",
+		\"ttl\":${TTL},
 		\"comment\": \"Update Domain record at $(date +%F-%H:%M:%S)\"
 	}"
 	echo ${NEW_PUBLIC_IP} > ${CURRENT_IP_FILE}
